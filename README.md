@@ -1,74 +1,126 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Seat Booking System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Real-time seat booking system built with Laravel 12. Handles concurrent seat locks, atomic bookings, and auto-release of expired holds. Supports two separate auth guards — regular users and admins/vendors.
 
-## About Laravel
+## Stack
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- Laravel 12, PHP 8.2+
+- MySQL
+- Blade + jQuery + custom CSS
+- Laravel Scheduler for background cleanup
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Setup
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+```bash
+git clone <repo-url>
+cd Seat-Booking-System
+composer install
+cp .env.example .env
+php artisan key:generate
+```
 
-## Learning Laravel
+Update DB credentials in `.env`, then:
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+```bash
+php artisan migrate
+php artisan db:seed
+php artisan serve
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+For expired-lock cleanup (dev), run in a separate terminal:
 
-## Laravel Sponsors
+```bash
+php artisan schedule:work
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+On production, add this cron entry:
 
-### Premium Partners
+```
+* * * * * cd /path/to/project && php artisan schedule:run >> /dev/null 2>&1
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## Config
 
-## Contributing
+Lock duration is configurable via `.env`:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```
+SEAT_LOCK_DURATION=5
+```
 
-## Code of Conduct
+## Authentication & Roles
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+The app uses **two separate guards** backed by two separate tables:
 
-## Security Vulnerabilities
+| Guard | Table | Who | Login URL |
+|-------|-------|-----|-----------|
+| `web` | `users` | Regular users (book seats only) | `/login` |
+| `admin` | `admins` | Admins & vendors (manage events + book seats) | `/admin/login` |
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Seeded credentials (via `php artisan db:seed`):
 
-## License
+| Email | Password | Role |
+|-------|----------|------|
+| `admin@example.com` | `admin123` | admin |
+| `vendor@example.com` | `vendor123` | vendor |
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### Authorization rules
 
+- **Guests** — browse events, view seat layouts
+- **Users** (`web` guard) — register/login, lock & book seats
+- **Admins / Vendors** (`admin` guard) — create/edit/delete events, and also book seats
 
+Event create/edit/update/destroy is locked behind `auth:admin`. Booking routes accept either guard (`auth:web,admin`).
 
+### Booker tracking
 
+Because bookings can now come from two different tables, `bookings.user_id` + `booker_type` (and `seats.locked_by` + `locked_by_type`) together identify who locked/booked a seat. The `App\Support\Booker` helper returns the active booker from whichever guard is logged in.
 
+## Architecture
 
+- **Controllers** — thin, delegate to services
+- **Services** — business logic (`EventService`, `SeatBookingService`)
+- **Form Requests** — validation (`StoreEventRequests`, `LoginRequest`, `RegisterRequest`)
+- **Cache** — seat availability cached, invalidated on writes
+- **Concurrency** — `DB::transaction` + `lockForUpdate()` (pessimistic row locking) prevents double booking
+- **Background job** — `seats:release-expired` Artisan command runs every minute via scheduler
+- **Client validation** — jQuery validators (`public/js/*-form-validation.js`) mirror server rules for instant feedback
+- **Post-logout back-button guard** — `NoCache` middleware sends `no-store` headers on authenticated pages
 
+## Route files
 
+Routes are split by audience:
 
+- **`routes/web.php`** — public pages, user auth (`/login`, `/register`), booking confirm/cancel
+- **`routes/admin.php`** — admin/vendor auth (`/admin/login`, `/admin/logout`) and event CRUD
 
- "I used pessimistic row-level locking with lockForUpdate() inside a database transaction. When a user locks
-  ▎ seats, I issue SELECT ... FOR UPDATE which blocks any other transaction trying to modify the same seat rows
-  ▎ until my transaction commits. I also re-validate the lock expiry inside the confirm-booking transaction, so
-  ▎ even if a user's lock expired while they were on the payment page, the booking is rejected atomically. Expired  ▎  locks are auto-released by a Laravel scheduled command that runs every minute with withoutOverlapping() to
-  ▎ prevent parallel executions."
+`routes/admin.php` is auto-loaded from `bootstrap/app.php` under the `web` middleware group.
+
+## Key routes
+
+| Method | URI | Guard | Purpose |
+|--------|-----|-------|---------|
+| GET | `/` | — | Event list |
+| GET | `/events/{id}` | — | Seat layout |
+| GET | `/register`, `/login` | guest:web | User auth forms |
+| POST | `/logout` | auth:web | User logout |
+| GET | `/admin/login` | guest:admin | Admin/vendor login |
+| POST | `/admin/logout` | auth:admin | Admin/vendor logout |
+| GET | `/events/create` | auth:admin | Create-event form |
+| POST | `/events` | auth:admin | Store event + seats |
+| PUT/DELETE | `/events/{id}` | auth:admin | Update / delete event |
+| POST | `/booking/initiate` | — | Lock selected seats (redirects guests to login) |
+| GET | `/booking/confirm/{event}` | auth:web,admin | Confirmation page with countdown |
+| POST | `/booking/confirm/{event}` | auth:web,admin | Finalize booking |
+| POST | `/booking/cancel/{event}` | auth:web,admin | Release held seats |
+
+## Database
+
+Core tables:
+
+- `users` — regular end-users
+- `admins` — admins & vendors (with `role` enum)
+- `events` — event details + `total_rows` / `total_columns`
+- `seats` — per-event seat grid; `locked_by` + `locked_by_type` record holder
+- `bookings` — one row per booked seat; `user_id` + `booker_type` record buyer
+
+FKs from `seats.locked_by` and `bookings.user_id` were dropped intentionally so the ID column can reference either `users` or `admins`; the `*_type` column disambiguates.

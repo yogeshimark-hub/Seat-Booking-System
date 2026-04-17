@@ -13,6 +13,7 @@ class Seat extends Model
           'seat_column',
           'status',
           'locked_by',
+          'locked_by_type',
           'lock_expires_at',
       ];
 

@@ -34,10 +34,13 @@ use App\Http\Controllers\booking\BookingController;
       Route::post('/login', [AuthController::class, 'login']);
   });
 
-  // Authenticated-only routes
+  // Logout — user guard only
   Route::middleware(['auth:web'])->group(function () {
       Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+  });
 
+  // Booking confirm/cancel — user OR admin/vendor can book
+  Route::middleware(['auth:web,admin'])->group(function () {
       Route::get('/booking/confirm/{event}', [BookingController::class, 'showConfirmation'])
           ->whereNumber('event')
           ->name('booking.confirm');
