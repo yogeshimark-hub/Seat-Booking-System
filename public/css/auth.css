@@ -1,0 +1,50 @@
+/* Auth pages */
+  .auth-box {
+      background: white;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      max-width: 450px;
+      margin: 40px auto;
+  }
+
+  .auth-box h1 {
+      margin-bottom: 5px;
+      color: #1e293b;
+  }
+
+  .auth-subtitle {
+      color: #64748b;
+      margin-bottom: 25px;
+      font-size: 14px;
+  }
+
+  .auth-footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 14px;
+      color: #64748b;
+  }
+
+  .auth-footer a {
+      color: #3498db;
+      text-decoration: none;
+      font-weight: 600;
+  }
+
+  .auth-footer a:hover {
+      text-decoration: underline;
+  }
+
+   .remember-group {
+      font-size: 14px;
+      color: #475569;
+  }
+
+  .remember-group label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-weight: normal;
+  }

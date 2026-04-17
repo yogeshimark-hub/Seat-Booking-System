@@ -1,0 +1,103 @@
+/* Confirm booking page */
+  .confirm-box {
+      background: white;
+      padding: 35px;
+      border-radius: 10px;
+      max-width: 600px;
+      margin: 20px auto;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  .countdown-bar {
+      background: #10b981;
+      color: white;
+      padding: 15px 20px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      transition: background 0.3s;
+  }
+
+  .countdown-bar.warning {
+      background: #f59e0b;
+  }
+
+  .countdown-bar.expired {
+      background: #ef4444;
+  }
+
+  .countdown-label {
+      font-size: 14px;
+  }
+
+  .countdown-timer {
+      font-size: 22px;
+      font-weight: bold;
+      font-family: 'Courier New', monospace;
+      letter-spacing: 2px;
+  }
+
+  .booking-info {
+      background: #f8fafc;
+      padding: 15px 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+  }
+
+  .booking-info p {
+      margin-bottom: 8px;
+      color: #475569;
+  }
+
+  .selected-seats-box {
+      background: #f8fafc;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+  }
+
+  .selected-seats-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 12px 0;
+  }
+
+  .seat-badge {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: white;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 13px;
+  }
+
+  .seat-total {
+      margin-top: 10px;
+      color: #64748b;
+      font-size: 14px;
+  }
+
+  .confirm-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 25px;
+  }
+
+  .confirm-actions form {
+      flex: 1;
+  }
+
+  .confirm-actions button {
+      width: 100%;
+      padding: 12px;
+      font-size: 15px;
+      font-weight: 600;
+  }
+
+  .confirm-actions button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+  }

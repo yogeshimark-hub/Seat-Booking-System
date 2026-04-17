@@ -1,0 +1,219 @@
+
+
+  /* Event Cards */
+  .events-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+  }
+
+  .event-card {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+
+  .event-card h3 {
+      margin-bottom: 10px;
+      color: #2c3e50;
+  }
+
+  .event-card p {
+      margin-bottom: 8px;
+      font-size: 14px;
+  }
+
+  .event-card .btn {
+      margin-top: 10px;
+  }
+
+  /* Forms */
+  .event-form {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      max-width: 600px;
+  }
+
+  .form-group {
+      margin-bottom: 20px;
+  }
+
+  .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      font-size: 14px;
+  }
+
+  .form-group input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+  }
+
+  .form-group input:focus {
+      outline: none;
+      border-color: #3498db;
+  }
+
+  .error {
+      color: #e74c3c;
+      font-size: 13px;
+      display: block;
+      margin-top: 5px;
+  }
+
+
+
+  /* Event header */                                                                                              
+  .event-header {
+      background: white;
+      padding: 20px 25px;
+      border-radius: 10px;
+      margin: 20px 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  .event-header h1 {
+      margin-bottom: 10px;
+      color: #1e293b;
+  }
+
+  .event-header p {
+      color: #64748b;
+      margin-bottom: 4px;
+  }
+
+  /* Screen indicator */
+  .screen {
+      background: linear-gradient(180deg, #cbd5e1 0%, #94a3b8 100%);
+      color: #1e293b;
+      text-align: center;
+      padding: 12px;
+      margin: 40px auto 30px;
+      border-radius: 50% / 60px;
+      max-width: 60%;
+      font-weight: 600;
+      letter-spacing: 4px;
+      font-size: 13px;
+      box-shadow: 0 6px 20px rgba(148, 163, 184, 0.4);
+      transform: perspective(400px) rotateX(-8deg);
+  }
+
+  /* Seat legend */
+  .seat-legend {
+      display: flex;
+      justify-content: center;
+      gap: 25px;
+      margin: 25px 0;
+      font-size: 14px;
+      color: #475569;
+  }
+
+  .seat-legend > div {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+  }
+
+  .seat-sample {
+      display: inline-block;
+      width: 22px;
+      height: 22px;
+      border-radius: 6px 6px 3px 3px;
+  }
+
+  /* Seat grid */
+  .seat-grid {
+      display: grid;
+      gap: 6px;
+      justify-content: center;
+      margin: 25px auto;
+      padding: 25px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      max-width: 100%;
+  }
+
+  .seat-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 12px;
+      color: #94a3b8;
+  }
+
+  .seat {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      border-radius: 6px 6px 3px 3px;
+      cursor: pointer;
+      color: white;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      border: none;
+  }
+
+  .seat:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  }
+
+  /* Seat statuses — softer, modern colors */
+  .seat.available,
+  .seat-sample.available {
+      background: linear-gradient(135deg, #10b981, #059669);
+  }
+
+  .seat.locked,
+  .seat-sample.locked {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      cursor: not-allowed;
+  }
+
+  .seat.booked,
+  .seat-sample.booked {
+      background: linear-gradient(135deg, #94a3b8, #64748b);
+      cursor: not-allowed;
+      color: rgba(255,255,255,0.7);
+  }
+
+  .seat.booked:hover,
+  .seat.locked:hover {
+      transform: none;
+      box-shadow: none;
+  }
+
+   /* Selected seat */
+  .seat.selected {
+      background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(59, 130, 246, 0.4);
+  }
+
+  /* Booking bar */
+  .booking-bar {
+      background: white;
+      padding: 15px 25px;
+      border-radius: 10px;
+      margin: 20px auto;
+      max-width: 500px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      font-weight: 600;
+      color: #1e293b;
+  }
