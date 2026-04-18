@@ -124,3 +124,4 @@ Core tables:
 - `bookings` — one row per booked seat; `user_id` + `booker_type` record buyer
 
 FKs from `seats.locked_by` and `bookings.user_id` were dropped intentionally so the ID column can reference either `users` or `admins`; the `*_type` column disambiguates.
+ only thing that is left real time update due to shortage of time only seat update show to is locked or booked is left user has need to refresh the screen to check the latest updatec status. 
