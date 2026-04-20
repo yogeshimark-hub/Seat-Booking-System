@@ -23,7 +23,10 @@
 
           <div class="form-group">
               <label for="event_date">Event Date & Time</label>
-              <input type="datetime-local" name="event_date" id="event_date" value="{{ old('event_date') }}">
+              {{-- min = right now, so the browser's datetime picker disables past dates (backend also enforces via "after:now") --}}
+              <input type="datetime-local" name="event_date" id="event_date"
+                     value="{{ old('event_date') }}"
+                     min="{{ now()->format('Y-m-d\TH:i') }}">
               @error('event_date') <span class="error">{{ $message }}</span> @enderror
           </div>
 
