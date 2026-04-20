@@ -20,6 +20,11 @@ use App\Http\Controllers\booking\BookingController;
       ->whereNumber('event')
       ->name('events.show');
 
+  // Public polling endpoint — browsers fetch fresh seat statuses every few seconds so locks made in other browsers show up here.
+  Route::get('/events/{event}/seat-statuses', [BookingController::class, 'seatStatuses'])
+      ->whereNumber('event')
+      ->name('events.seat-statuses');
+
   // Booking initiate — accessible to both guests and logged-in users
   // (controller decides: guest → save session + redirect to login, logged-in → lock seats)
   Route::post('/booking/initiate', [BookingController::class, 'initiate'])
@@ -52,4 +57,13 @@ use App\Http\Controllers\booking\BookingController;
       Route::post('/booking/cancel/{event}', [BookingController::class, 'cancel'])
           ->whereNumber('event')
           ->name('booking.cancel');
+
+      // AJAX lock / unlock — called when user clicks a seat on the event page.
+      Route::post('/seats/{seat}/lock', [BookingController::class, 'lockSeat'])
+          ->whereNumber('seat')
+          ->name('seats.lock');
+
+      Route::delete('/seats/{seat}/unlock', [BookingController::class, 'unlockSeat'])
+          ->whereNumber('seat')
+          ->name('seats.unlock');
   });

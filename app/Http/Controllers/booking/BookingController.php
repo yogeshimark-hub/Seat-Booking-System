@@ -7,6 +7,7 @@ use App\Services\SeatBookingService;
 use App\Support\Booker;
 use Illuminate\Http\Request;
 use App\Models\Event;
+use App\Models\Seat;
 
 class BookingController extends Controller
 {
@@ -110,6 +111,68 @@ class BookingController extends Controller
         return redirect()
             ->route('events.show', $event->id)
             ->with('success', 'Booking confirmed! ' . $result['seat_count'] . ' seat(s) booked successfully.');
+    }
+
+    // AJAX: lock a single seat when user clicks it. Returns JSON so the JS can update the UI without a page reload.
+    public function lockSeat(Seat $seat)
+    {
+        $booker = Booker::current();
+
+        if (!$booker) {
+            return response()->json(['success' => false, 'message' => 'Please login to select seats.'], 401);
+        }
+
+        $result = $this->seatBookingService->lockSeats(
+            $seat->event_id,
+            [$seat->id],
+            $booker['id'],
+            $booker['type']
+        );
+
+        return response()->json($result, $result['success'] ? 200 : 409);
+    }
+
+    // AJAX: release a single seat (user clicked an already-selected seat to deselect it).
+    public function unlockSeat(Seat $seat)
+    {
+        $booker = Booker::current();
+
+        if (!$booker) {
+            return response()->json(['success' => false, 'message' => 'Not authenticated.'], 401);
+        }
+
+        $result = $this->seatBookingService->releaseSingleSeatLock(
+            $seat->event_id,
+            $seat->id,
+            $booker['id'],
+            $booker['type']
+        );
+
+        return response()->json($result, $result['success'] ? 200 : 403);
+    }
+
+    // AJAX polling endpoint: returns current status of every seat for this event.
+    // The `mine` flag lets the browser show the current user's own locks as "selected" (yellow) rather than "locked" (gray).
+    public function seatStatuses(Event $event)
+    {
+        $booker = Booker::current();
+
+        $seats = $event->seats()->get(['id', 'status', 'locked_by', 'locked_by_type']);
+
+        $payload = $seats->map(function ($seat) use ($booker) {
+            $mine = $booker
+                && $seat->status === 'locked'
+                && $seat->locked_by === $booker['id']
+                && $seat->locked_by_type === $booker['type'];
+
+            return [
+                'id' => $seat->id,
+                'status' => $seat->status,
+                'mine' => $mine,
+            ];
+        });
+
+        return response()->json(['seats' => $payload]);
     }
 
     public function cancel(Event $event)

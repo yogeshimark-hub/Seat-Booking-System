@@ -138,6 +138,42 @@ class SeatBookingService
         });
     }
 
+    // Release a single seat's lock (used when user clicks an already-selected seat to deselect it).
+    // Guards: seat must belong to this event AND currently be locked by this same booker — prevents one user cancelling another's lock.
+    public function releaseSingleSeatLock(int $eventId, int $seatId, int $bookerId, string $bookerType): array
+    {
+        return DB::transaction(function () use ($eventId, $seatId, $bookerId, $bookerType) {
+
+            $seat = Seat::where('id', $seatId)
+                ->where('event_id', $eventId)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$seat) {
+                return ['success' => false, 'message' => 'Seat not found for this event.'];
+            }
+
+            $isOwnedByMe = $seat->status === 'locked'
+                && $seat->locked_by === $bookerId
+                && $seat->locked_by_type === $bookerType;
+
+            if (!$isOwnedByMe) {
+                return ['success' => false, 'message' => 'You cannot release a seat you do not own.'];
+            }
+
+            $seat->update([
+                'status' => 'available',
+                'locked_by' => null,
+                'locked_by_type' => null,
+                'lock_expires_at' => null,
+            ]);
+
+            Cache::forget("event.{$eventId}.seats");
+
+            return ['success' => true, 'message' => 'Seat released.'];
+        });
+    }
+
     public function releaseUserLocks(int $eventId, int $bookerId, string $bookerType): int
     {
         $affected = Seat::where('event_id', $eventId)
