@@ -101,6 +101,13 @@
           const $seat = $('.seat[data-seat-id="' + seatId + '"]');
           if (!$seat.length) return;
 
+          // Preserve a guest's local-only selection: if the server still says the seat is available and the user picked it in this tab, leave it alone.
+          // Without this, polling would wipe a guest's selection every 5s because guests never write to the DB until they log in.
+          const isLocallySelected = $seat.hasClass('selected');
+          if (!IS_LOGGED_IN && isLocallySelected && status === 'available') {
+              return;
+          }
+
           $seat.removeClass('available locked booked selected');
 
           if (mine) {
